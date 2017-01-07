@@ -20,18 +20,11 @@ fn main() {
     // Setting a handler for messages
     client.on_message(|context, message| {
         let author = message.author;
-        let content = &*message.content;
-        match content {
-            "!test" => misc_commands::test(context, author, content),
+        let prefix = message.content.split_whitespace().nth(0);
+        match prefix {
+            Some("!test") => misc_commands::test(context, author),
             _ => {}
         }
-
-        //if message.content == "!ping" {
-            // Sends a message, and checks that it worked
-        //    if let Err(why) = context.say("Pong!") {
-        //        println!("Error sending message: {:?}", why);
-        //    }
-        //}
     });
 
     // Setting a handler for ready
