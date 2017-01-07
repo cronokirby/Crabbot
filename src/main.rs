@@ -2,7 +2,7 @@ extern crate serenity;
 use serenity::Client;
 
 extern crate crabbot;
-use crabbot::misc_commands::commands as misc_commands;
+use crabbot::commands;
 
 use std::env;
 
@@ -22,7 +22,7 @@ fn main() {
         let author = message.author;
         let prefix = message.content.split_whitespace().nth(0);
         match prefix {
-            Some("!test") => misc_commands::test(context, author),
+            Some("!test") => commands::test(context, message.channel_id, author),
             _ => {}
         }
     });
