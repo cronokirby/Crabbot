@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["cronokirby <cronokirby@gmail.com>"]
 
 [dependencies]
+serenity = "0.1"
