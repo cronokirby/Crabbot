@@ -1,12 +1,10 @@
+use std::env;
+
 extern crate serenity;
 use serenity::Client;
 
 extern crate crabbot;
 use crabbot::commands;
-
-use std::env;
-
-
 
 
 fn main() {
@@ -20,9 +18,12 @@ fn main() {
     // Setting a handler for messages
     client.on_message(|context, message| {
         let author = message.author;
+        let channel = message.channel_id;
+        // Match against the first word of a message
         let prefix = message.content.split_whitespace().nth(0);
         match prefix {
-            Some("!test") => commands::test(context, message.channel_id, author),
+            Some("<test") => commands::test(context, channel, author),
+            Some("<number") => commands::number(),
             _ => {}
         }
     });
