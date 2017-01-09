@@ -6,7 +6,7 @@ use self::rustc_serialize::json::{Json};
 use http;
 
 
-type url = String;
+type Url = String;
 
 #[derive (Debug)]
 struct Category {
