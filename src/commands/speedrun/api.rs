@@ -13,8 +13,8 @@ struct Category {
     name: String
 }
 
+// This acts as a helper function to `parse_categories`, getting mapped over an array
 fn parse_category(json: &Json) -> Category {
-    // This is theoretically unsafe...
     let name = json.as_object().unwrap()
                    .get("name").unwrap()
                    .as_string().unwrap();
@@ -22,21 +22,17 @@ fn parse_category(json: &Json) -> Category {
 }
 
 
-
+// This function isn't really safe, but an error in json parsing is relatively rare
+// Call this with `catch_unwind`, because of that.
 fn parse_categories(json_string: &str) -> Option<Vec<Category>> {
-    let data = Json::from_str(json_string);
-    if let Err(_) = data {
-        return None
-    }
-    // This variable exists so that the data lives to the end of the scope
-    let unwrapped = data.unwrap();
-    let category_data = unwrapped.as_object()
-                            .and_then(|f| f.get("data"))
-                            .and_then(|f| f.as_array());
-    // Not much point making this safe, since `parse_category` isn't
-    let categories = category_data.unwrap()
-                        .iter().map(|json| parse_category(&json))
-                        .collect();
+    // The use of 2 variables here is to extend the lifetime of `data`
+    let data = Json::from_str(json_string).unwrap();
+    let category_data = data.as_object().unwrap()
+                            .get("data").unwrap()
+                            .as_array().unwrap();
+    let categories = category_data.iter()
+                            .map(|json| parse_category(&json))
+                            .collect();
     Some(categories)
 }
 
