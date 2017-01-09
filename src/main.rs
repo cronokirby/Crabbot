@@ -5,9 +5,10 @@ use serenity::Client;
 
 extern crate crabbot;
 use crabbot::commands;
-
+use crabbot::commands::speedrun::api as speedrun;
 
 fn main() {
+    speedrun::testo();
     // Configure the client to use a preset token
     let token = env::var("DISCORD_TOKEN1")
         .expect("Expected a token in the environment");

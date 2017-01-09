@@ -3,7 +3,7 @@ use self::serenity::client::Context;
 use self::serenity::model::{ChannelId, User};
 
 use commands::messages::send_min_embed;
-use HTTP;
+use http;
 
 
 pub fn test<C>(context: Context, channel_id: C, author: User)
@@ -16,7 +16,7 @@ pub fn test<C>(context: Context, channel_id: C, author: User)
 
 pub fn number() {
     let url = "http://numbersapi.com/42";
-    match HTTP::get(&url) {
+    match http::get(&url) {
         Ok(content) => println!("{:?}", content),
         Err(why) => println!("command `number` failed:\n{:?}", why)
     }

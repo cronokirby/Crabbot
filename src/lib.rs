@@ -1,2 +1,2 @@
-mod HTTP;
+mod http;
 pub mod commands;

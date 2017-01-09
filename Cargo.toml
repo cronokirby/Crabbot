@@ -6,3 +6,4 @@ authors = ["cronokirby <cronokirby@gmail.com>"]
 [dependencies]
 serenity = "0.1"
 hyper = "0.9.14"
+rustc-serialize = "0.3.22"
