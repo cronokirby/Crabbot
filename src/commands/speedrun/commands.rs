@@ -34,14 +34,26 @@ pub fn categories<C>(context: Context, channel_id: C, words: &Vec<&str>)
 }
 
 
-fn format_run(run: &api::Run) -> String {
-    let time = {
-        let time = run.time.parse::<i32>().unwrap();
-        let (minutes, seconds) = (time / 60, time % 60);
-        let (hours, minutes) = (minutes / 60, minutes % 60);
-        format!("{}:{}:{}", hours, minutes, seconds)
+fn format_run(run: &api::Run, rank: &str) -> String {
+    let place = match rank {
+        "1" => "**WR**".to_string(),
+        "2" => "**2nd** place time".to_string(),
+        "3" => "**3rd** place time".to_string(),
+        n   => format!("**{}th** place time", n)
     };
-    format!("The WR is {} by {}\n{:?}", time, run.user_name, run.video)
+    let time = {
+        // removes the milliseconds
+        let time = run.time.split(".").nth(0).unwrap()
+                           .parse::<i32>().unwrap();
+        let (minutes, seconds) = (time / 60, time % 60);
+        let hours = match minutes / 60 {
+            0 => "".to_string(),
+            h => format!("{}:", h)
+        };
+        let minutes = minutes % 60;
+        format!("{}{}:{}", hours, minutes, seconds)
+    };
+    format!("The {} is **{}** by **{}**\n{:?}", place, time, run.user_name, run.video)
 }
 
 
@@ -61,7 +73,7 @@ pub fn time<C>(context: Context, channel_id: C, words: &Vec<&str>)
     let runs = leaderboard.and_then(|lb| api::fetch_runs(&lb).ok());
     let requested_run = runs.and_then(|r|
         r.get(place.unwrap() - 1)
-         .map(|run| format_run(&run)));
+         .map(|run| format_run(&run, words[1])));
     let response = match requested_run {
         Some(string) => string,
         None => "Woops, that run doesn't seem to exist...".to_string()
