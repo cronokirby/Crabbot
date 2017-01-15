@@ -27,6 +27,7 @@ fn main() {
             Some(&"<test") => commands::test(context, channel, author),
             Some(&"<number") => commands::number(),
             Some(&"<categories") => speedrun::categories(context, channel, &words),
+            Some(&"<time") => speedrun::time(context, channel, &words),
             _ => {}
         }
     });

@@ -7,12 +7,18 @@ use self::rustc_serialize::json::{Json};
 use http;
 
 
+fn fetch<T>(url: &str, parser: &Fn(&str) -> T) -> Result<T> {
+    let json = http::get(url);
+    json.map(|str| parser(&*str))
+}
+
+
 type Url = String;
 
 #[derive (Debug)]
 pub struct Category {
-    name: String,
-    url: Url
+    pub name: String,
+    pub leaderboard: Url
 }
 
 
@@ -21,13 +27,13 @@ fn parse_category(json: &Json) -> Category {
     let data = json.as_object().unwrap();
     let name = data.get("name").unwrap()
                    .as_string().unwrap();
-    let url = data.get("links").unwrap()
+    let leaderboard = data.get("links").unwrap()
                   .as_array().unwrap()[3]
                   .as_object().unwrap()
                   .get("uri").unwrap()
                   .as_string().unwrap();
     Category{ name: name.to_string()
-            , url: url.to_string() }
+            , leaderboard: leaderboard.to_string() }
 }
 
 
@@ -45,17 +51,61 @@ fn parse_categories(json_string: &str) -> Vec<Category> {
 }
 
 
+
 pub fn fetch_categories(url: &str) -> Result<Vec<Category>> {
-    let json = http::get(url);
-    json.map(|str| parse_categories(&*str))
+    fetch(url, &parse_categories)
 }
 
 
-pub fn testo() {
-    let json = http::get("http://www.speedrun.com/api/v1/games/ff1/categories");
-    match json {
-        Ok(string) => println!("{:?}", parse_categories(&*string)),
-        _ => {}
-    }
+pub struct Run {
+    pub user_name: String,
+    pub time: String,
+    pub video: Option<Url>
+}
 
+
+fn parse_run(json: &Json) -> Run {
+    let data = json.as_object().unwrap()
+                   .get("run").unwrap().as_object().unwrap();
+    let user_name = {
+        let player = data.get("players").unwrap()
+                         .as_array().unwrap()[0]
+                         .as_object().unwrap();
+        let user_type = player.get("rel").unwrap()
+                              .as_string().unwrap();
+        match user_type {
+            "user"  => "fetch_user",
+            _ => player.get("name").unwrap()
+                       .as_string().unwrap()
+        }
+    };
+    let time = data.get("times").unwrap()
+                   .as_object().unwrap()
+                   .get("primary_t").unwrap();
+
+    let video = data.get("videos").and_then(|links|
+                    links.as_object().unwrap()
+                         .get("links").unwrap().as_array().unwrap()
+                         [0].as_object().unwrap()
+                         .get("uri").unwrap().as_string())
+                         .map(|s| s.to_string());
+    Run{ user_name: user_name.to_string()
+       , time: time.to_string()
+       , video: video }
+}
+
+fn parse_leaderboard(json_string: &str) -> Vec<Run> {
+    let data = Json::from_str(json_string).unwrap();
+    let leaderboard = data.as_object().unwrap()
+                          .get("data").unwrap().as_array().unwrap()[0]
+                          .as_object().unwrap()
+                          .get("runs").unwrap().as_array().unwrap();
+    let runs = leaderboard.iter()
+                          .map(|json| parse_run(&json))
+                          .collect();
+    runs
+}
+
+pub fn fetch_runs(url: &str) -> Result<Vec<Run>> {
+    fetch(url, &parse_leaderboard)
 }

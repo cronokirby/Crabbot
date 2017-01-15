@@ -9,6 +9,7 @@ pub fn send_min_embed<C>(context: Context, channel_id: C, content: &str)
     if let Err(why) = context.send_message(channel_id, |m| m
         .embed(|e| e
             .description(content)
+            .color(0x19cbc5)
         )
     ) { println!("Error sending embedded message {:?}", why); }
 }
