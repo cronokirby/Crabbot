@@ -25,13 +25,13 @@ pub struct Category {
 // This acts as a helper function to `parse_categories`, getting mapped over an array
 fn parse_category(json: &Json) -> Category {
     let data = json.as_object().unwrap();
-    let name = data.get("name").unwrap()
-                   .as_string().unwrap();
-    let leaderboard = data.get("links").unwrap()
-                  .as_array().unwrap()[3]
-                  .as_object().unwrap()
-                  .get("uri").unwrap()
-                  .as_string().unwrap();
+
+    let name = data.get("name").unwrap().as_string().unwrap();
+
+    let leaderboard = data.get("links").unwrap().as_array().unwrap()
+                          [3].as_object().unwrap()
+                          .get("uri").unwrap().as_string().unwrap();
+
     Category{ name: name.to_string()
             , leaderboard: leaderboard.to_string() }
 }
@@ -42,11 +42,9 @@ fn parse_categories(json_string: &str) -> Vec<Category> {
     // The use of 2 variables here is to extend the lifetime of `data`
     let data = Json::from_str(json_string).unwrap();
     let category_data = data.as_object().unwrap()
-                            .get("data").unwrap()
-                            .as_array().unwrap();
+                            .get("data").unwrap().as_array().unwrap();
     let categories = category_data.iter()
-                            .map(|json| parse_category(&json))
-                            .collect();
+                            .map(|json| parse_category(&json)).collect();
     categories
 }
 
@@ -68,19 +66,15 @@ fn parse_run(json: &Json) -> Run {
     let data = json.as_object().unwrap()
                    .get("run").unwrap().as_object().unwrap();
     let user_name = {
-        let player = data.get("players").unwrap()
-                         .as_array().unwrap()[0]
-                         .as_object().unwrap();
-        let user_type = player.get("rel").unwrap()
-                              .as_string().unwrap();
+        let player = data.get("players").unwrap().as_array().unwrap()
+                         [0].as_object().unwrap();
+        let user_type = player.get("rel").unwrap().as_string().unwrap();
         match user_type {
             "user"  => "fetch_user",
-            _ => player.get("name").unwrap()
-                       .as_string().unwrap()
+            _ => player.get("name").unwrap().as_string().unwrap()
         }
     };
-    let time = data.get("times").unwrap()
-                   .as_object().unwrap()
+    let time = data.get("times").unwrap().as_object().unwrap()
                    .get("primary_t").unwrap();
 
     let video = data.get("videos").and_then(|links|
@@ -97,8 +91,8 @@ fn parse_run(json: &Json) -> Run {
 fn parse_leaderboard(json_string: &str) -> Vec<Run> {
     let data = Json::from_str(json_string).unwrap();
     let leaderboard = data.as_object().unwrap()
-                          .get("data").unwrap().as_array().unwrap()[0]
-                          .as_object().unwrap()
+                          .get("data").unwrap().as_array().unwrap()
+                          [0].as_object().unwrap()
                           .get("runs").unwrap().as_array().unwrap();
     let runs = leaderboard.iter()
                           .map(|json| parse_run(&json))
