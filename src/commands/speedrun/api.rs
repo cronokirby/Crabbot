@@ -62,6 +62,16 @@ pub struct Run {
 }
 
 
+fn parse_name(json: &str) -> String {
+    let data = Json::from_str(json).unwrap();
+    data.as_object().unwrap()
+        .get("data").unwrap().as_object().unwrap()
+        .get("names").unwrap().as_object().unwrap()
+        .get("international").unwrap().as_string().unwrap()
+        .to_string()
+}
+
+// If the player is a user, and fetching the name fails, this will fail
 fn parse_run(json: &Json) -> Run {
     let data = json.as_object().unwrap()
                    .get("run").unwrap().as_object().unwrap();
@@ -70,8 +80,11 @@ fn parse_run(json: &Json) -> Run {
                          [0].as_object().unwrap();
         let user_type = player.get("rel").unwrap().as_string().unwrap();
         match user_type {
-            "user"  => "fetch_user",
-            _ => player.get("name").unwrap().as_string().unwrap()
+            "user"  => {
+                let url = player.get("uri").unwrap().as_string().unwrap();
+                fetch(url, &parse_name).unwrap()
+            },
+            _ => player.get("name").unwrap().as_string().unwrap().to_string()
         }
     };
     let time = data.get("times").unwrap().as_object().unwrap()
@@ -83,7 +96,7 @@ fn parse_run(json: &Json) -> Run {
                          [0].as_object().unwrap()
                          .get("uri").unwrap().as_string())
                          .map(|s| s.to_string());
-    Run{ user_name: user_name.to_string()
+    Run{ user_name: user_name
        , time: time.to_string()
        , video: video }
 }

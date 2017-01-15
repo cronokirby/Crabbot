@@ -35,7 +35,13 @@ pub fn categories<C>(context: Context, channel_id: C, words: &Vec<&str>)
 
 
 fn format_run(run: &api::Run) -> String {
-    format!("The WR is {} by {}\n{:?}", run.time, run.user_name, run.video)
+    let time = {
+        let time = run.time.parse::<i32>().unwrap();
+        let (minutes, seconds) = (time / 60, time % 60);
+        let (hours, minutes) = (minutes / 60, minutes % 60);
+        format!("{}:{}:{}", hours, minutes, seconds)
+    };
+    format!("The WR is {} by {}\n{:?}", time, run.user_name, run.video)
 }
 
 
@@ -58,7 +64,7 @@ pub fn time<C>(context: Context, channel_id: C, words: &Vec<&str>)
          .map(|run| format_run(&run)));
     let response = match requested_run {
         Some(string) => string,
-        None => "Woops, that category doesn't seem to exist...".to_string()
+        None => "Woops, that run doesn't seem to exist...".to_string()
     };
     send_min_embed(context, channel_id, &*response);
 }
